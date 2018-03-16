@@ -5,6 +5,15 @@
 
 > [Консольный клиент для InSales uploader](https://github.com/VladimirIvanin/devu)
 
+## Почему InSales uploader?
+
+:computer: Разработка сайтов на локальном диске
+
+:heart: Совместимость с тысячами Gulp плагинов
+
+:file_folder: Файлы шаблона автоматически сортируются по типам
+
+
 ## Установка
 
 ```
