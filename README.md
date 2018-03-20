@@ -3,8 +3,6 @@
 
 > [Минимальный конфиг Gulp.js](https://github.com/brainmurder/InSales-uploader-gulp-test)
 
-> [Консольный клиент для InSales uploader](https://github.com/VladimirIvanin/devu)
-
 ## Почему InSales uploader?
 
 :computer: Разработка сайтов на локальном диске
@@ -51,6 +49,49 @@ IU.download()
     return IU.stream()
   })
 ```
+
+### Консольный клиент
+
+Чтобы воспользоваться InSales-Uploader через консоль, установите пакет глобально `npm install insales-uploader -g`.
+
+#### Файл настроек
+
+Имя файла - **insales-uploader.js**
+
+```javascript
+module.exports = {
+  account: {
+    id: '0123456798',
+    token: '0123456798',
+    url: 'shop-41324.myinsales.ru',
+    http: true
+  },
+  theme:{
+    id: '854716',
+    root: './',
+    backup: true,
+    assets: true,
+    assetsSync: true,
+    excludeFiles: []
+  },
+  util: {
+    openBrowser: true
+  }
+};
+```
+
+#### Запуск методов:
+
+`uploader <название метода> <название метода>`
+
+Примеры:
+
+`uploader` - запустит метод `start`
+
+`uploader download` - запустит метод `download`
+
+`uploader download stream` - запустит методы `download stream`
+
 
 ### Структура папок
 
