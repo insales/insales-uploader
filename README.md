@@ -52,9 +52,10 @@ IU.download()
 
 ### Консольный клиент
 
-Чтобы воспользоваться InSales-Uploader через консоль, установите пакет глобально `npm install insales-uploader -g`.
+Чтобы воспользоваться InSales-Uploader через консоль, установите пакет глобально:
+`npm install insales-uploader -g`.
 
-![InSales](https://cdn.rawgit.com/insales/insales-uploader/master/uploader-cli.gif)
+<img src="https://cdn.rawgit.com/insales/insales-uploader/master/uploader-cli.gif" width="552">
 
 #### Файл настроек
 
