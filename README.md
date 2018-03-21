@@ -1,7 +1,7 @@
 # InSales <> uploader
 Менеджер ассетов для платформы [InSales](http://www.insales.ru/).
 
-> [Минимальный конфиг Gulp.js](https://github.com/brainmurder/InSales-uploader-gulp-test)
+> [Пример организации работы с InSales <> uploader](https://github.com/insales-uploader/uploader-work-space)
 
 ## Почему InSales uploader?
 
