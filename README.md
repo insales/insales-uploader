@@ -86,6 +86,8 @@ module.exports = {
 
 Примеры:
 
+`uploader init` - создаст файл настроек **insales-config.js**
+
 `uploader` - запустит метод `start`
 
 `uploader download` - запустит метод `download`
