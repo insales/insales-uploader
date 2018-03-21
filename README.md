@@ -56,7 +56,7 @@ IU.download()
 
 #### Файл настроек
 
-Имя файла - **insales-uploader.js**
+Имя файла - **insales-config.js**
 
 ```javascript
 module.exports = {
