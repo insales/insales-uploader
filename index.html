@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en-US"><head>
+    <meta charset="UTF-8">
+
+<!-- Begin Jekyll SEO tag v2.4.0 -->
+<title>InSales &lt;&gt; uploader | insales-uploader</title>
+<meta name="generator" content="Jekyll v3.6.2">
+<meta property="og:title" content="InSales <> uploader">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Менеджер ассетов для платформы InSales.">
+<meta property="og:description" content="Менеджер ассетов для платформы InSales.">
+<link rel="canonical" href="https://insales.github.io/insales-uploader/">
+<meta property="og:url" content="https://insales.github.io/insales-uploader/">
+<meta property="og:site_name" content="insales-uploader">
+<script type="application/ld+json">
+{"name":"insales-uploader","description":"Менеджер ассетов для платформы InSales.","@type":"WebSite","url":"https://insales.github.io/insales-uploader/","headline":"InSales &lt;&gt; uploader","@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <meta name="description" content="Менеджер ассетов для платформы InSales.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#157878">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/insales-uploader/assets/css/style.css?v=06a7c26a149ee3ce04d6c05ad2497c2a05700601">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">insales-uploader</h1>
+      <h2 class="project-tagline">Менеджер ассетов для платформы InSales.</h2>
+      
+        <a href="https://github.com/insales/insales-uploader" class="btn">View on GitHub</a>
+      
+      
+    </section>
+
+    <section class="main-content">
+      <h1 id="insales--uploader">InSales &lt;&gt; uploader</h1>
+<p>Менеджер ассетов для платформы <a href="http://www.insales.ru/">InSales</a>.</p>
+
+<blockquote>
+  <p><a href="https://github.com/insales-uploader/uploader-work-space">Пример организации работы с InSales &lt;&gt; uploader</a></p>
+</blockquote>
+
+<h2 id="почему-insales-uploader">Почему InSales uploader?</h2>
+
+<p>:computer: Разработка сайтов на локальном диске</p>
+
+<p>:heart: Совместимость с тысячами Gulp плагинов</p>
+
+<p>:file_folder: Файлы шаблона автоматически сортируются по типам</p>
+
+<h2 id="установка">Установка</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install insales-uploader
+</code></pre></div></div>
+
+<h2 id="пример">Пример</h2>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Настройки</span>
+<span class="kd">const</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">account</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">id</span><span class="p">:</span> <span class="s1">'0123456798'</span><span class="p">,</span>
+    <span class="na">token</span><span class="p">:</span> <span class="s1">'0123456798'</span><span class="p">,</span>
+    <span class="na">url</span><span class="p">:</span> <span class="s1">'shop-41324.myinsales.ru'</span><span class="p">,</span>
+    <span class="na">http</span><span class="p">:</span> <span class="kc">true</span>
+  <span class="p">},</span>
+  <span class="na">theme</span><span class="p">:{</span>
+    <span class="na">id</span><span class="p">:</span> <span class="s1">'854716'</span><span class="p">,</span>
+    <span class="na">root</span><span class="p">:</span> <span class="s1">'./'</span><span class="p">,</span>
+    <span class="na">backup</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="na">assetsSync</span><span class="p">:</span> <span class="kc">true</span>
+  <span class="p">},</span>
+  <span class="na">util</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">openBrowser</span><span class="p">:</span> <span class="kc">true</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Инициализация</span>
+<span class="kd">const</span> <span class="nx">uploader</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'insales-uploader'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">IU</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">uploader</span><span class="p">(</span><span class="nx">options</span><span class="p">);</span>
+
+<span class="nx">IU</span><span class="p">.</span><span class="nx">download</span><span class="p">()</span>
+  <span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="k">return</span> <span class="nx">IU</span><span class="p">.</span><span class="nx">stream</span><span class="p">()</span>
+  <span class="p">})</span>
+</code></pre></div></div>
+
+<h3 id="консольный-клиент">Консольный клиент</h3>
+
+<p>Чтобы воспользоваться InSales-Uploader через консоль, установите пакет глобально:
+<code class="highlighter-rouge">npm install insales-uploader -g</code>.</p>
+
+<p><img src="https://cdn.rawgit.com/insales/insales-uploader/master/uploader-cli.gif" width="552"></p>
+
+<h4 id="файл-настроек">Файл настроек</h4>
+
+<p>Имя файла - <strong>insales-config.js</strong></p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">account</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">id</span><span class="p">:</span> <span class="s1">'0123456798'</span><span class="p">,</span>
+    <span class="na">token</span><span class="p">:</span> <span class="s1">'0123456798'</span><span class="p">,</span>
+    <span class="na">url</span><span class="p">:</span> <span class="s1">'shop-41324.myinsales.ru'</span><span class="p">,</span>
+    <span class="na">http</span><span class="p">:</span> <span class="kc">true</span>
+  <span class="p">},</span>
+  <span class="na">theme</span><span class="p">:{</span>
+    <span class="na">id</span><span class="p">:</span> <span class="s1">'854716'</span><span class="p">,</span>
+    <span class="na">root</span><span class="p">:</span> <span class="s1">'./'</span><span class="p">,</span>
+    <span class="na">backup</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="na">assets</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="na">assetsSync</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="na">excludeFiles</span><span class="p">:</span> <span class="p">[]</span>
+  <span class="p">},</span>
+  <span class="na">util</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">openBrowser</span><span class="p">:</span> <span class="kc">true</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h4 id="запуск-методов">Запуск методов:</h4>
+
+<p><code class="highlighter-rouge">uploader &lt;название метода&gt; &lt;название метода&gt;</code></p>
+
+<p>Примеры:</p>
+
+<p><code class="highlighter-rouge">uploader init</code> - создаст файл настроек <strong>insales-config.js</strong></p>
+
+<p><code class="highlighter-rouge">uploader</code> - запустит метод <code class="highlighter-rouge">start</code></p>
+
+<p><code class="highlighter-rouge">uploader download</code> - запустит метод <code class="highlighter-rouge">download</code></p>
+
+<p><code class="highlighter-rouge">uploader download stream</code> - запустит методы <code class="highlighter-rouge">download stream</code></p>
+
+<h3 id="структура-папок">Структура папок</h3>
+
+<p>Папки <code class="highlighter-rouge">media</code> и <code class="highlighter-rouge">assets</code>, дублирут друг друга. Когда запущен стрим изменения попадают в обе папки. Так же при скачивании файлы раскладываются в <code class="highlighter-rouge">media</code> и <code class="highlighter-rouge">assets</code>. Assets создаётся для удобства работы.
+Папка <code class="highlighter-rouge">media</code> является приоритетной, так как она предусмотрена архитектурой тем на платформе InSales.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root/
+    |-- assets/
+        |-- fonts/
+        |-- img/
+        |-- js/
+        |-- media/
+        |-- style/
+        |-- svg/
+    |-- config/
+    |-- media/
+    |-- snippets/
+    |-- templates/
+    |-- backup/
+</code></pre></div></div>
+
+<p><img src="https://cdn.rawgit.com/insales/insales-uploader/master/insales.png" alt="InSales"></p>
+
+
+      <footer class="site-footer">
+        
+          <span class="site-footer-owner"><a href="https://github.com/insales/insales-uploader">insales-uploader</a> is maintained by <a href="https://github.com/insales">insales</a>.</span>
+        
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</span>
+      </footer>
+    </section>
+
+    
+  
+
+<script id="wappalyzer" src="chrome-extension://gppongmhjkpfnbhagpmjfkannfbllamg/js/inject.js"></script></body></html>
