@@ -54,6 +54,8 @@ IU.download()
 
 Чтобы воспользоваться InSales-Uploader через консоль, установите пакет глобально `npm install insales-uploader -g`.
 
+![InSales](https://cdn.rawgit.com/insales/insales-uploader/master/uploader-cli.gif)
+
 #### Файл настроек
 
 Имя файла - **insales-config.js**
@@ -116,4 +118,4 @@ root/
     |-- backup/
 ```
 
-![InSales](https://cdn.rawgit.com/brainmurder/insales-uploader/master/insales.png)
+![InSales](https://cdn.rawgit.com/insales/insales-uploader/master/insales.png)
