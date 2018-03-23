@@ -329,7 +329,7 @@ table.plain tbody > tr:nth-child(odd) > th {
   position: absolute;
   z-index: 0;
   left: 0%;
-  top: 730px;
+  top: 930px;
   width: 5076px;
   -webkit-animation: slide 30s linear infinite;
   -o-animation: slide 30s linear infinite;
@@ -411,7 +411,7 @@ table.plain tbody > tr:nth-child(odd) > th {
   position: absolute;
   z-index: 0;
   left: 0%;
-  top: 680px;
+  top: 880px;
   width: 5076px;
   -webkit-animation: slide 60s linear infinite;
   -o-animation: slide 60s linear infinite;
@@ -424,7 +424,7 @@ table.plain tbody > tr:nth-child(odd) > th {
   position: absolute;
   z-index: 0;
   left: 0%;
-  top: 705px;
+  top: 905px;
   width: 5076px;
   -webkit-animation: slide 90s linear infinite;
   -o-animation: slide 90s linear infinite;
