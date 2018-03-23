@@ -540,6 +540,7 @@ table.plain tbody > tr:nth-child(odd) > th {
 }
 
 .custom {
+  padding-top: 3rem;
   padding-bottom: 4rem;
 }
 
