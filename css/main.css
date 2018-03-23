@@ -314,7 +314,7 @@ table.plain tbody > tr:nth-child(odd) > th {
   left: 0;
   top: 0;
   width: 100%;
-  height: 100%;
+  height: 101%;
   border: 10px solid #2b2336;
 }
 
