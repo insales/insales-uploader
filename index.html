@@ -18,26 +18,130 @@
   <meta name="description" content="" />
   <meta name="keywords" content="" />
   <meta name="copyright" content="" />
-  <link rel="stylesheet" href="css/spider.css" />
-  <link rel="stylesheet" href="css/main.css" />
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/main.js"></script>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" />
+  <link rel="stylesheet" href="/css/spider.css" />
+  <link rel="stylesheet" href="/css/main.css" />
 </head>
 
 <body>
   <div class="main_wrapper">
     <div class="main_header">
+      <div class="infinite-border"></div>
       <div class="container_main text-center">
-        <h1>InSale
-          <> Uploader</h1><video poster="https://cdn.rawgit.com/insales/insales-uploader/gh-pages/poster.png" playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop"><source src="https://cdn.rawgit.com/insales/insales-uploader/gh-pages/up.mp4"/></video>
+        <div class="row-flex flex-between">
+          <h1>In<span>S</span><span>ales</span><span><</span><span>></span><span>U</span>ploader</h1>
+          <div class="install">
+            <div class="row-flex flex-center"><a href="https://github.com/insales/insales-uploader">github</a><a href="https://www.npmjs.com/package/insales-uploader">npmjs</a></div>
+          </div>
+        </div>
+        <div class="video-container"><video poster="https://cdn.rawgit.com/insales/insales-uploader/gh-pages/poster.png" playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop"><source src="https://cdn.rawgit.com/insales/insales-uploader/gh-pages/up.mp4"/></video></div>
         <div
-          class="install">
-          <div class="row-flex flex-center"><a href="https://github.com/insales/insales-uploader">github</a><a href="https://www.npmjs.com/package/insales-uploader">npmjs</a></div>
+          class="advantage row-flex flex-center is-grid">
+          <div class="advantage-item"><img src="./images/coding.svg" />
+            <div class="advantage-text">Разработка сайтов на локальном диске</div>
+          </div>
+          <div class="advantage-item"><img src="./images/gulp.svg" />
+            <div class="advantage-text">Совместимость с тысячами Gulp плагинов</div>
+          </div>
+          <div class="advantage-item"><img src="./images/list.svg" />
+            <div class="advantage-text">Файлы шаблона автоматически сортируются по типам</div>
+          </div>
       </div>
       <div class="text-center">
         <!--.next-button-->
       </div>
     </div>
   </div>
-  <div class="doc"></div>
+  <div class="custom container_main">
+    <h2>Установка</h2>
+    <div class="custom-inner">
+      <pre>npm i -g insales-uploader</pre>
+      <blockquote>InSales
+        <>Uploader является модулем для node.js<br/>Если установить модуль глобально, методы можно запускать через команду <code>uploader</code><br/>При локальной установке подключение как обычно через require или import <code>const uploader = require('insales-uploader');</code></blockquote>
+    </div>
+  </div>
+  <div class="doc container_main">
+    <h2>Настройка</h2>
+    <h3>Получить ключи доступа</h3>
+    <div class="video-container"><video poster="./images/access-key.png" playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop"><source src="https://cdn.rawgit.com/insales/insales-uploader/gh-pages/access-key.mp4"/></video></div><br/><br/>
+    <div class="doc-inner">
+      <h3>Локальное подкючение</h3>
+      <pre><code class="highlight-js">// Настройки
+const options = {
+  account: {
+    id: '0123456798',
+    token: '0123456798',
+    url: 'shop-41324.myinsales.ru',
+    http: true
+  },
+  theme:{
+    id: '854716', // id темы
+    root: './', // Рабочая директория
+    backup: true,
+    assetsSync: true
+  },
+  util: {
+    openBrowser: true
+  }
+};
+
+// Инициализация
+const uploader = require('insales-uploader');
+const IU = new uploader(options);
+
+IU.download()
+  .then(()=&gt;{
+    return IU.stream()
+  })
+</code></pre>
+    </div>
+    <div class="doc-block"><br/><br/>
+      <h3>Консольный клиент</h3>
+      <p>Чтобы воспользоваться InSales-Uploader через консоль, установите пакет глобально: <code>npm install -g insales-uploader</code></p>
+      <p>Настройки для запуска методов из консоли беруться из файла insales-config.js.</p>
+      <pre><code class="highlight-js">// Содержимое insales-config.js
+module.exports = {
+  account: {
+    id: '0123456798',
+    token: '0123456798',
+    url: 'shop-41324.myinsales.ru',
+    http: true
+  },
+  theme:{
+    id: '854716',
+    root: './',
+    backup: true,
+    assets: true,
+    assetsSync: true,
+    excludeFiles: []
+  },
+  util: {
+    openBrowser: true
+  }
+};
+</code></pre>
+      <h4>Запуск методов:</h4>
+      <p><code>uploader &lt;название метода&gt; &lt;название метода&gt;</code></p>
+      <p>Примеры:</p>
+      <p><code>uploader init</code> - создаст файл настроек <strong>insales-config.js</strong></p>
+      <p><code>uploader</code> - запустит метод <code>start</code></p>
+      <p><code>uploader download</code> - запустит метод <code>download</code></p>
+      <p><code>uploader download stream</code> - запустит методы <code>download stream</code></p>
+    </div>
+  </div>
+  <div class="methods container_main">
+    <h2>Методы</h2>
+    <p><code>download</code> — загрузка темы на компьютер</p>
+    <p><code>pull</code> — загрузка темы на компьютер. Перед началом загрузки, все локальные файлы удаляются</p>
+    <p><code>upload</code> — загрузка темы на сервер с полным обновлением файлов.</p>
+    <p><code>stream</code> — отслеживание изменений в файлах</p>
+    <p><code>backup</code> — создание архива с резервной копией</p>
+    <p><code>downloadFiles</code> — скачать файлы из раздела <code>файлы</code> в бэк-офисе</p>
+    <p><code>uploadFiles</code> — загрузка файлов в раздел <code>файлы</code> (Загружаются файлы из директории <code>files</code>)</p>
+  </div>
   </div>
 </body>
 
