@@ -1,7 +1,9 @@
 # InSales <> uploader
 Менеджер ассетов для платформы [InSales](http://www.insales.ru/).
 
-> [Пример организации работы с InSales <> uploader](https://github.com/insales-uploader/uploader-work-space)
+> [:arrow_forward: Установка/Настройка/Запуск](https://www.youtube.com/watch?v=ImFlI1sUp5U)
+
+> [:octocat: Пример организации работы с InSales <> uploader](https://github.com/insales-uploader/uploader-work-space)
 
 ## Почему InSales uploader?
 
