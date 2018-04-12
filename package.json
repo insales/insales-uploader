@@ -54,6 +54,7 @@
     "gulp-plumber": "^1.2.0",
     "insales": "^1.4.0",
     "is-binary-buffer": "^2.0.0",
+    "is-online": "^7.0.0",
     "latest-version": "^3.1.0",
     "liftoff": "^2.5.0",
     "matcher": "^1.1.0",
