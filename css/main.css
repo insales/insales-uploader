@@ -548,3 +548,36 @@ table.plain tbody > tr:nth-child(odd) > th {
   padding-top: 3rem;
   padding-bottom: 4rem;
 }
+table.options {
+  color: initial;
+  background: #fff;
+}
+
+table.options [colspan="4"] {
+  background: hsla(262, 21%, 31%, 1);
+  text-align: center;
+  font-weight: 500;
+  color: #fff;
+}
+
+table.options td, table.options th {
+  border: 1px solid #dddedf;
+}
+
+table.options th {
+  text-align: center;
+  vertical-align: middle;
+}
+
+table.options td:nth-child(2) {
+  text-align: center;
+  color: #1f7199;
+}
+
+table.options td:nth-child(3) {
+  text-align: center;
+  color: #397300;
+}
+.container_main.is-options {
+  margin-top: 3rem;
+}

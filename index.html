@@ -142,6 +142,157 @@ module.exports = {
       <p><code>uploader download stream</code> - запустит методы <code>download stream</code></p>
     </div>
   </div>
+  <div class="container_main is-options" id="options">
+    <h2>Параметры</h2>
+    <table class="options">
+      <tr>
+        <th>
+          Параметр
+        </th>
+        <th>
+          Тип
+        </th>
+        <th>
+          Значение поумолчанию
+        </th>
+        <th>
+          Описание
+        </th>
+      </tr>
+      <tr>
+        <td colspan="4">
+          account
+        </td>
+      </tr>
+      <tr>
+        <td>id</td>
+        <td>string</td>
+        <td>null</td>
+        <td>Необходимо сгенерировать в бэк-офисе: Приложения -> Разработчикам -> Создать новый ключ доступа</td>
+      </tr>
+      <tr>
+        <td>token</td>
+        <td>string</td>
+        <td>null</td>
+        <td>Необходимо сгенерировать в бэк-офисе: Приложения -> Разработчикам -> Создать новый ключ доступа</td>
+      </tr>
+      <tr>
+        <td>url</td>
+        <td>string</td>
+        <td>null</td>
+        <td>Url магазина из бэк-офиса, ссылка не должна содержать 'http://' и '/'</td>
+      </tr>
+      <tr>
+        <td>http</td>
+        <td>boolean</td>
+        <td>true</td>
+        <td>Отсутствие ssl. Если у сайта есть ssl и возникают проблемы с api, нужно передать false</td>
+      </tr>
+      <tr>
+        <td colspan="4">theme</td>
+      </tr>
+      <tr>
+        <td>id</td>
+        <td>string/number</td>
+        <td>null</td>
+        <td>Id темы</td>
+      </tr>
+      <tr>
+        <td>root</td>
+        <td>string</td>
+        <td>'.'</td>
+        <td>Корнеевая папка для сохранения темы</td>
+      </tr>
+      <tr>
+        <td>backup</td>
+        <td>boolean</td>
+        <td>true</td>
+        <td>Создавать резервные копии темы</td>
+      </tr>
+      <tr>
+        <td>assetsSync</td>
+        <td>boolean</td>
+        <td>true</td>
+        <td>Отслеживать директорию assets</td>
+      </tr>
+      <tr>
+        <td>excludeFiles</td>
+        <td>array</td>
+        <td>[]</td>
+        <td>Массив путей, которые будут игнорироваться при отслеживании изменений.</td>
+      </tr>
+      <tr>
+        <td>assetsDomain</td>
+        <td>string</td>
+        <td>'https://assets.insales.ru'</td>
+        <td>Адрес cdn с медиа файлами. Переключить на https://assets3.insales.ru в случае недоступности https://assets.insales.ru</td>
+      </tr>
+      <tr>
+        <td>onUpdate</td>
+        <td>function</td>
+        <td>function(){}</td>
+        <td>Колбек который срабатывает после каждого обновления в теме</td>
+      </tr>
+      <tr>
+        <td colspan="4">util</td>
+      </tr>
+      <tr>
+        <td>openBrowser</td>
+        <td>boolean</td>
+        <td>true</td>
+        <td>Открывать сайт в браузере после запуска метода stream?</td>
+      </tr>
+      <tr>
+        <td colspan="4">plugins</td>
+      </tr>
+      <tr>
+        <td>exclude</td>
+        <td>array</td>
+        <td>[]</td>
+        <td>Массив путей, которые будут игнорироваться плагинами.</td>
+      </tr>
+      <tr>
+        <td>style</td>
+        <td>function</td>
+        <td>null</td>
+        <td>
+          Колбек для подключения плагинов по работе со стилями (<a href="https://github.com/insales-uploader/uploader-work-space/blob/a83e505e492e235204392950c9618ed682d91b79/insales-config.js#L42">Пример</a>).
+        </td>
+      </tr>
+      <tr>
+        <td>script</td>
+        <td>function</td>
+        <td>null</td>
+        <td>
+          Колбек для подключения плагинов по работе со скриптами (<a href="https://github.com/insales-uploader/uploader-work-space/blob/a83e505e492e235204392950c9618ed682d91b79/insales-config.js#L50">Пример</a>).
+        </td>
+      </tr>
+      <tr>
+        <td>img</td>
+        <td>function</td>
+        <td>null</td>
+        <td>
+          Колбек для подключения плагинов по работе с изображениями (<a href="https://github.com/insales-uploader/uploader-work-space/blob/a83e505e492e235204392950c9618ed682d91b79/insales-config.js#L55">Пример</a>).
+        </td>
+      </tr>
+      <tr>
+        <td>media</td>
+        <td>function</td>
+        <td>null</td>
+        <td>
+          Колбек для подключения плагинов по работе с медиафайлами.
+        </td>
+      </tr>
+      <tr>
+        <td>font</td>
+        <td>function</td>
+        <td>null</td>
+        <td>
+          Колбек для подключения плагинов по работе с шрифтами.
+        </td>
+      </tr>
+    </table>
+  </div>
   <div class="methods container_main">
     <h2>Методы</h2>
     <p><code>download</code> — загрузка темы на компьютер</p>
