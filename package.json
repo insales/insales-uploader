@@ -1,6 +1,6 @@
 {
   "name": "insales-uploader",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "description": "InSales assets manager",
   "homepage": "https://github.com/insales/insales-uploader",
   "main": "dist/index.js",
@@ -37,7 +37,7 @@
     "bin"
   ],
   "dependencies": {
-    "ansi-colors": "^3.1.0",
+    "ansi-colors": "^3.2.2",
     "babel-runtime": "^6.26.0",
     "clone": "^2.1.2",
     "color-support": "^1.1.3",
