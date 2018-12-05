@@ -291,6 +291,34 @@ module.exports = {
           Колбек для подключения плагинов по работе с шрифтами.
         </td>
       </tr>
+      <tr>
+        <td colspan="4">chokidarOptions</td>
+      </tr>
+      <tr>
+        <td>id</td>
+        <td>object</td>
+        <td>
+<pre>
+{
+    ignored: /[\/\\]\./,
+    ignoreInitial: true,
+    followSymlinks: true,
+    usePolling: false,
+    interval: 200,
+    delay: 0,
+    binaryInterval: 300,
+    alwaysStat: true,
+    depth: 99,
+    awaitWriteFinish: {
+      stabilityThreshold: 100,
+      pollInterval: 100
+    },
+    ignorePermissionErrors: true
+  }
+</pre>
+        </td>
+        <td>Настройки модуля для отслеживания изменений в файлах</td>
+      </tr>
     </table>
   </div>
   <div class="methods container_main">
