@@ -1,6 +1,6 @@
 {
   "name": "insales-uploader",
-  "version": "1.9.5",
+  "version": "1.9.6",
   "description": "InSales assets manager",
   "homepage": "https://github.com/insales/insales-uploader",
   "main": "dist/index.js",
@@ -62,7 +62,7 @@
     "moment": "^2.22.2",
     "node-notifier": "^5.3.0",
     "opn": "^5.4.0",
-    "progress": "^2.0.2",
+    "progress": "^2.0.3",
     "through2": "^3.0.0",
     "upath": "^1.0.4",
     "v8flags": "^3.1.1",
