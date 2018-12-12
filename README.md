@@ -87,7 +87,7 @@ module.exports = {
 
 #### Запуск методов:
 
-`uploader <название метода> <название метода>`
+`uploader <название метода>`
 
 Примеры:
 
@@ -97,7 +97,7 @@ module.exports = {
 
 `uploader download` - запустит метод `download`
 
-`uploader download stream` - запустит методы `download stream`
+`uploader -h` - справка
 
 
 ### Структура папок
