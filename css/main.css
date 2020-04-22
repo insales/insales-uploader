@@ -590,3 +590,9 @@ table.options td:nth-child(3) {
   overflow: hidden;
   padding: 1rem;
 }
+
+@media (max-width: 768px) {
+  .container_main.is-options {
+    overflow: auto;
+  }
+}
