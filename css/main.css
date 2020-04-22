@@ -323,13 +323,13 @@ table.plain tbody > tr:nth-child(odd) > th {
   z-index: 1;
 }
 
-.main_header:after {
+.infinite-border:after {
   content: '';
   height: 30px;
   position: absolute;
   z-index: 0;
   left: 0%;
-  top: 930px;
+  top: 24px;
   width: 5076px;
   -webkit-animation: slide 30s linear infinite;
   -o-animation: slide 30s linear infinite;
@@ -405,13 +405,13 @@ table.plain tbody > tr:nth-child(odd) > th {
   }
 }
 
-.main_header:before {
+.infinite-border:before {
   content: '';
   height: 30px;
   position: absolute;
   z-index: 0;
   left: 0%;
-  top: 880px;
+  top: -24px;
   width: 5076px;
   -webkit-animation: slide 60s linear infinite;
   -o-animation: slide 60s linear infinite;
@@ -580,4 +580,13 @@ table.options td:nth-child(3) {
 }
 .container_main.is-options {
   margin-top: 3rem;
+}
+.video-container video {
+  object-fit: contain;
+  width: 100%;
+}
+.main_wrapper {
+  position: relative;
+  overflow: hidden;
+  padding: 1rem;
 }
