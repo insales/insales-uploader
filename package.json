@@ -52,7 +52,7 @@
     "glob-watcher": "^5.0.3",
     "gulp-chain": "^2.0.1",
     "gulp-plumber": "^1.2.1",
-    "insales": "^1.4.0",
+    "insales": "^2.0.2",
     "is-binary-buffer": "^2.0.0",
     "is-online": "^8.3.0",
     "latest-version": "^5.1.0",
