@@ -34,6 +34,27 @@ test('syncChange writes transformed Vinyl contents and handles absent copies', a
   syncChange(app, file);
   assert.equal(await fs.readFile(path.join(root, 'media/app.js'), 'utf8'), 'transformed');
 });
+
+test('actual Vinyl paths identify aliases and synchronize media in both directions on Windows', async t => {
+  const root = await directory(t);
+  const app = instance(root);
+  const media = path.join(root, 'media/app.js');
+  const alias = path.join(root, 'assets/js/app.js');
+  await write({path: media, content: 'from media'});
+  const vfs = require('vinyl-fs');
+  for await (const file of vfs.src(media)) {
+    assert.equal(app.getFileInfo(file, true).isAsset, false);
+    syncChange(app, file);
+  }
+  assert.equal(await fs.readFile(alias, 'utf8'), 'from media');
+  await fs.writeFile(alias, 'from alias');
+  for await (const file of vfs.src(alias)) {
+    assert.equal(app.getFileInfo(file, true).isAsset, true);
+    syncChange(app, file);
+    assert.equal(file.isAsset, true);
+  }
+  assert.equal(await fs.readFile(media, 'utf8'), 'from alias');
+});
 test('syncUnlink calls back once even if counterpart is missing', async t => {
   const root = await directory(t);
   const app = instance(root);

@@ -128,7 +128,8 @@ test('account files paginate and retain CDN hostname while decoding filenames', 
     const url = new URL(r.url, 'http://test');
     assert.equal(url.searchParams.get('per_page'), '100');
     const count = url.searchParams.get('page') === '1' ? 100 : 1;
-    return {body: Array.from({length: count}, (_, i) => ({absolute_url: `https://cdn.example.com/files/файл%20${i}.txt?timestamp=1`}))};
+    const offset = (Number(url.searchParams.get('page')) - 1) * 100;
+    return {body: Array.from({length: count}, (_, i) => ({id: offset + i + 1, absolute_url: `https://cdn.example.com/files/файл%20${offset + i}.txt?timestamp=1`}))};
   });
   const app = instance(await directory(t), remote.host);
   const files = await listFile(app.options, app.paths);
@@ -137,18 +138,51 @@ test('account files paginate and retain CDN hostname while decoding filenames', 
   assert.equal(files[0].name, 'файл 0.txt');
   assert.ok(!files[0].path.includes('?'));
 });
-test('raw downloads preserve JSON whitespace and absolute media URLs are not prefixed twice', async t => {
+
+test('account files accept real extensionless URLs without Windows trailing dots or filename collisions', async t => {
+  const names = ['photo.', 'photo', 'Photo', 'photo-1', 'image%20.jpg', 'trailing%20'];
+  const remote = await server(t, () => ({body: names.map((name, i) => ({id: i + 1, absolute_url: `https://cdn.example.com/files/${i}/original/${name}?v=1`}))}));
+  const app = instance(await directory(t), remote.host);
+  const files = await listFile(app.options, app.paths);
+  assert.deepEqual(files.map(f => f.name), ['photo-1-2', 'photo-2', 'Photo-3', 'photo-1', 'image .jpg', 'trailing']);
+  assert.equal(new Set(files.map(f => f.path.toLowerCase())).size, files.length);
+  assert.ok(files[0].url.includes('/photo.?v=1'), 'the CDN URL must remain unchanged');
+  assert.deepEqual((await listFile(app.options, app.paths)).map(f => f.path), files.map(f => f.path), 'mapping must be stable');
+});
+
+test('account file URL decoding still rejects traversal and reserved device names', async t => {
+  let name = '..%2Foutside.txt';
+  const remote = await server(t, () => ({body: [{id: 1, absolute_url: `https://cdn.example.com/files/${name}`}]}));
+  const app = instance(await directory(t), remote.host);
+  await assert.rejects(listFile(app.options, app.paths), /Invalid file name/);
+  name = 'NUL.txt';
+  await assert.rejects(listFile(app.options, app.paths), /Invalid file name/);
+});
+test('raw downloads preserve JSON whitespace and media uses authenticated source bytes instead of CDN', async t => {
   const root = await directory(t);
   const text = '{\n  "setting": true\n}\n';
-  const remote = await server(t, r => ({body: r.url.endsWith('raw.json') ? text : Buffer.from([0, 255, 7])}));
+  const remote = await server(t, r => {
+    assert.match(r.url, /^\/admin\/themes\/42\/assets\/[12]\/raw\.json$/);
+    assert.ok(r.headers.authorization);
+    return {body: r.url.endsWith('/1/raw.json') ? text : Buffer.from([0, 255, 7, 128, 239, 191])};
+  });
   const app = instance(root, remote.host);
   const raw = path.join(root, 'config/settings_data.json');
   await getAsset.call(app, {id: 1, isRaw: true, path: raw});
   assert.equal(await fs.readFile(raw, 'utf8'), text);
   const media = path.join(root, 'media/image.png');
   await getAsset.call(app, {id: 2, isMedia: true, path: media, asset_url: `http://${remote.host}/cdn/image.png?v=1`});
-  assert.deepEqual(await fs.readFile(media), Buffer.from([0, 255, 7]));
-  assert.equal(remote.requests[1].url, '/cdn/image.png?v=1');
+  assert.deepEqual(await fs.readFile(media), Buffer.from([0, 255, 7, 128, 239, 191]));
+  assert.equal(remote.requests[1].url, '/admin/themes/42/assets/2/raw.json');
+});
+
+test('binary raw errors keep the API status and response body', async t => {
+  const remote = await server(t, () => ({status: 404, body: {error: 'missing'}}));
+  await assert.rejects(Client({id: 'key', http: true}).getAssetRaw({url: remote.host, token: 'secret', theme: 42, assetId: 1, binary: true}), error => {
+    assert.equal(error.statusCode, 404);
+    assert.deepEqual(error.response.data, {error: 'missing'});
+    return true;
+  });
 });
 test('invalid settings JSON is rejected before it can corrupt remote settings', async t => {
   const remote = await server(t, () => { assert.fail('must not call API'); });

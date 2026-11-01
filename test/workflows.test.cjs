@@ -93,6 +93,42 @@ test('bulk upload updates local widgets and never removes remote widgets from a 
   assert.equal(mutations[0].method, 'PUT');
   assert.equal(mutations[0].body.snippet_content, 'updated');
   assert.equal(mutations[0].body.handle, undefined);
+  assert.equal(mutations[0].body.name, undefined, 'unchanged localized metadata must not be resubmitted');
+});
+
+test('downloaded widget metadata and null sources round-trip without unsupported PUT fields', async t => {
+  const remoteWidget = {...widget, description: 'Description', setup: null};
+  const remote = await server(t, r => {
+    if (r.method === 'GET') return {body: r.url.includes('widget_types') ? [remoteWidget] : []};
+    assert.deepEqual(r.body, {snippet_content: '<p>Changed</p>'});
+    return {body: {...remoteWidget, ...r.body}};
+  });
+  const app = instance(await directory(t), remote.host);
+  const infoPath = path.join(app.paths.root, 'widget_types/banner/info.json');
+  const info = {type: widget.type, handle: widget.handle, name: {ru: widget.name}, description: {ru: 'Description'}, generation: 4,
+    page_kinds: widget.page_kinds, widget_list_kinds: widget.widget_list_kinds, widget_category_handle: widget.widget_category_handle};
+  await write({path: infoPath, content: JSON.stringify(info)});
+  await write({path: path.join(path.dirname(infoPath), 'setup.json'), content: ''});
+  await write({path: path.join(path.dirname(infoPath), 'snippet.liquid'), content: widget.snippet_content});
+  await change.call(app, app.getFileInfo({path: infoPath}, true).asset, false);
+  assert.equal(remote.requests.filter(r => r.method !== 'GET').length, 0);
+  await write({path: path.join(path.dirname(infoPath), 'snippet.liquid'), content: '<p>Changed</p>'});
+  await change.call(app, app.getFileInfo({path: infoPath}, true).asset, false);
+  assert.equal(remote.requests.filter(r => r.method === 'PUT').length, 1);
+});
+
+test('real widget metadata validation failures propagate instead of silently skipping a requested rename', async t => {
+  const body = {name: {ru: ['unknown attribute']}, widget_category_handle: ['unknown attribute']};
+  const remote = await server(t, r => r.method === 'GET' ? {body: r.url.includes('widget_types') ? [widget] : []} : {status: 422, body});
+  const app = instance(await directory(t), remote.host);
+  const file = path.join(app.paths.root, 'widget_types/banner/info.json');
+  await write({path: file, content: JSON.stringify({type: widget.type, handle: widget.handle, name: {ru: 'Новое имя'}, widget_category_handle: 'new-category'})});
+  await assert.rejects(change.call(app, app.getFileInfo({path: file}, true).asset, false), error => {
+    assert.equal(error.statusCode, 422);
+    assert.deepEqual(error.response.data, body);
+    return true;
+  });
+  assert.deepEqual(remote.requests.find(r => r.method === 'PUT').body, {name: {ru: 'Новое имя'}, widget_category_handle: 'new-category'});
 });
 test('top-level upload and download reject failed requests', async t => {
   const remote = await server(t, () => ({status: 403, body: {message: 'forbidden'}}));
