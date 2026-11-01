@@ -1,0 +1,75 @@
+name: Publish to npm
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Check tag and package versions
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node <<'NODE'
+          const assert = require('node:assert/strict');
+          const pkg = require('./package.json');
+          const lock = require('./package-lock.json');
+          assert.equal(process.env.RELEASE_TAG, `v${pkg.version}`, 'Tag must match package.json');
+          assert.equal(lock.version, pkg.version, 'Lockfile version must match package.json');
+          assert.equal(lock.packages[''].version, pkg.version, 'Lockfile root version must match package.json');
+          NODE
+
+      - run: npm ci
+      - name: Pack tested build
+        run: npm pack --pack-destination "$RUNNER_TEMP"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: npm-package
+          path: ${{ runner.temp }}/insales-uploader-*.tgz
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: npm-package
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Publish package with OIDC
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          dist_tag=latest
+          if [[ "${RELEASE_TAG%%+*}" == *-* ]]; then
+            dist_tag=next
+          fi
+          npm publish ./insales-uploader-*.tgz --access public --tag "$dist_tag"

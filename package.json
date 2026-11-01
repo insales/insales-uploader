@@ -23,7 +23,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/insales/insales-uploader.git"
+    "url": "git+https://github.com/insales/insales-uploader.git"
   },
   "license": "MIT",
   "author": "Ivanin Vladimir",
