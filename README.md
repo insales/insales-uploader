@@ -1,4 +1,7 @@
 # InSales <> uploader
+
+[![npm version](https://img.shields.io/npm/v/insales-uploader)](https://www.npmjs.com/package/insales-uploader)
+
 Менеджер ассетов для платформы [InSales](http://www.insales.ru/).
 
 > [:arrow_forward: Установка/Настройка/Запуск](https://www.youtube.com/watch?v=ImFlI1sUp5U)
