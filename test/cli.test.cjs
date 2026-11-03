@@ -9,6 +9,36 @@ const execute = promisify(execFile);
 const cli = path.resolve(__dirname, '../bin/uploader.js');
 const run = (args, cwd) => execute(process.execPath, [cli, ...args], {cwd, timeout: 15000});
 
+const runWithNodeVersion = version => execute(process.execPath, ['-e', `
+  Object.defineProperty(process.versions, 'node', {value: ${JSON.stringify(version)}});
+  process.argv = [process.execPath, ${JSON.stringify(cli)}, '--version'];
+  require(${JSON.stringify(cli)});
+`], {timeout: 15000});
+
+test('CLI rejects unsupported Node.js before loading uploader', async t => {
+  for (const version of ['18.20.8', '20.19.0', '22.0.0', '22.17.99']) {
+    await t.test(version, async () => {
+      await assert.rejects(runWithNodeVersion(version), error => {
+        assert.equal(error.code, 1);
+        assert.equal(error.stdout, '');
+        assert.equal(error.stderr, 'Для запуска insales-uploader нужен Node.js >=22.18.0.\n' +
+          `Сейчас используется Node.js ${version}.\n` +
+          'Обновите Node.js и запустите uploader снова.\n');
+        return true;
+      });
+    });
+  }
+});
+test('CLI accepts the minimum Node.js version and newer releases', async t => {
+  for (const version of ['22.18.0', '22.18.1', '22.19.0', '24.0.0']) {
+    await t.test(version, async () => {
+      const result = await runWithNodeVersion(version);
+      assert.equal(result.stdout.trim(), require('../package.json').version);
+      assert.equal(result.stderr, '');
+    });
+  }
+});
+
 test('CLI help and version work without config', async t => {
   const root = await directory(t);
   assert.match((await run(['--help'], root)).stdout, /download/);
