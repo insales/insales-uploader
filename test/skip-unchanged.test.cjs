@@ -1,5 +1,6 @@
 const {test} = require('node:test');
 const assert = require('node:assert/strict');
+const syncFs = require('node:fs');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const {directory, server, instance} = require('./helpers.cjs');
@@ -7,8 +8,8 @@ const write = require('../dist/tasks/file/write').default;
 
 const oldTime = new Date('2001-02-03T04:05:06Z');
 
-async function markOld(file) {
-  await fs.utimes(file, oldTime, oldTime);
+async function markOld(file, time = oldTime) {
+  await fs.utimes(file, time, time);
   return (await fs.stat(file)).mtimeMs;
 }
 
@@ -65,7 +66,15 @@ test('skipUnchanged propagates read errors instead of overwriting an unreadable 
   assert.equal(await fs.readFile(file, 'utf8'), 'same');
 });
 
-test('download preserves unchanged theme, widget, preview and assets copies while updating changed files', async t => {
+for (const preserveCopyTimestamps of [false, true]) test(`download preserves unchanged files and updates changed content (${preserveCopyTimestamps ? 'source timestamps' : 'native copy'})`, async t => {
+  if (preserveCopyTimestamps) {
+    const copy = syncFs.copyFileSync;
+    t.mock.method(syncFs, 'copyFileSync', (source, destination, flags) => {
+      copy(source, destination, flags);
+      const stat = syncFs.statSync(source);
+      syncFs.utimesSync(destination, stat.atime, stat.mtime);
+    });
+  }
   const root = await directory(t);
   let revision = 0;
   let host;
@@ -100,7 +109,10 @@ test('download preserves unchanged theme, widget, preview and assets copies whil
   const files = (await fs.readdir(root, {recursive: true, withFileTypes: true}))
     .filter(entry => entry.isFile()).map(entry => path.join(entry.parentPath, entry.name));
   const snapshots = new Map();
-  for (const file of files) snapshots.set(file, {content: await fs.readFile(file), mtime: await markOld(file)});
+  for (const file of files) {
+    const time = new Date(oldTime.getTime() + snapshots.size * 1000);
+    snapshots.set(file, {content: await fs.readFile(file), mtime: await markOld(file, time)});
+  }
   for (const name of ['assets/img/logo.png', 'assets/js/app.js', 'widget_types/banner/preview.jpg']) {
     assert.ok(snapshots.has(path.join(root, name)), name);
   }
@@ -114,7 +126,7 @@ test('download preserves unchanged theme, widget, preview and assets copies whil
   revision = 1;
   const repairedCopy = path.join(root, 'assets/js/app.js');
   await fs.writeFile(repairedCopy, 'local edits');
-  await markOld(repairedCopy);
+  snapshots.get(repairedCopy).mtime = await markOld(repairedCopy, new Date('2002-02-03T04:05:06Z'));
   const recreated = path.join(root, 'widget_types/banner/setup.json');
   await fs.unlink(recreated);
   await app.download();
@@ -143,9 +155,10 @@ test('download preserves unchanged theme, widget, preview and assets copies whil
   assert.equal(await fs.readFile(recreated, 'utf8'), '');
 
   app.options.theme.skipUnchanged = false;
-  for (const file of files) await markOld(file);
+  const overwrittenTimes = new Map();
+  for (const file of files) overwrittenTimes.set(file, await markOld(file));
   await app.download();
-  for (const [file, before] of snapshots) assert.notEqual((await fs.stat(file)).mtimeMs, before.mtime, file);
+  for (const [file, before] of overwrittenTimes) assert.notEqual((await fs.stat(file)).mtimeMs, before, file);
 });
 
 test('downloadFiles preserves equal binary content and still updates changed files', async t => {
