@@ -167,37 +167,6 @@ npm pack --dry-run
 
 В GitHub Actions добавлена матрица Windows/Linux и Node.js 22.18/24 с тестами и проверкой упаковки.
 
-## Публикация в npm
-
-Workflow `.github/workflows/publish.yml` запускается при отправке тега `vX.Y.Z`.
-Тег должен точно совпадать с версией в `package.json` и `package-lock.json`.
-После успешных тестов на Windows/Linux и Node.js 22.18/24 workflow собирает npm-архив
-и публикует его через Trusted Publishing (OIDC), без секрета `NPM_TOKEN`.
-Обычные версии получают npm-тег `latest`, предварительные (например, `v2.0.0-beta.1`) — `next`.
-
-В [настройках пакета npm](https://www.npmjs.com/package/insales-uploader/access)
-Trusted Publisher должен иметь следующие параметры:
-
-- Provider: GitHub Actions.
-- Organization or user: `insales`.
-- Repository: `insales-uploader`.
-- Workflow filename: `publish.yml`.
-- Environment name: оставить пустым.
-- Allowed actions: разрешить `npm publish`.
-
-Для следующего выпуска из чистой рабочей копии `master`:
-
-```sh
-npm version patch
-git push origin master
-git push origin --tags
-```
-
-`npm version` обновляет оба файла версий, создаёт коммит и тег. Для minor/major
-используйте соответствующий аргумент. Если версия уже обновлена и закоммичена,
-создайте только соответствующий тег (`git tag vX.Y.Z`) и отправьте его
-(`git push origin vX.Y.Z`). GitHub Release для запуска публикации не требуется.
-
 ## Синхронизация и виджеты
 
 Перед `upload` должны существовать папки `templates`, `snippets`, `config` и `media`. Начать можно с `download`. Если папку нельзя прочитать, загрузка прекращается до изменения сервера. `upload` по-прежнему удаляет обычные ассеты, отсутствующие локально; серверный отказ удалить защищённый ассет теперь становится ошибкой.
