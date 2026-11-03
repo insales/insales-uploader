@@ -10,6 +10,7 @@ interface CliOptions {
   cwd?: string;
   myappfile?: string;
   require?: string[];
+  skipUnchanged?: boolean;
 }
 function assertConfig(value: unknown): asserts value is UploaderOptions {
   if (!isRecord(value) || !isRecord(value.account) || !isRecord(value.theme))
@@ -43,6 +44,8 @@ program
   .version(metadata.version, '-v, --version')
   .option('--cwd <path>', 'рабочая директория')
   .option('--myappfile <path>', 'путь к файлу настроек')
+  .option('--skip-unchanged', 'не перезаписывать файлы с тем же содержимым')
+  .option('--no-skip-unchanged', 'перезаписывать файлы с тем же содержимым')
   .option(
     '--require <module>',
     'подключить модуль',
@@ -63,7 +66,11 @@ function instance(): InSalesUploader {
   const required: unknown = load(configPath);
   const config = isRecord(required) && required.default ? required.default : required;
   assertConfig(config);
-  uploader = createUploader(config);
+  const options =
+    flags.skipUnchanged === undefined
+      ? config
+      : { ...config, theme: { ...config.theme, skipUnchanged: flags.skipUnchanged } };
+  uploader = createUploader(options);
   return uploader;
 }
 const commands = [

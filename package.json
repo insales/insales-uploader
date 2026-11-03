@@ -51,9 +51,7 @@
   },
   "files": [
     "dist",
-    "bin",
-    "MIGRATION.md",
-    "CHANGELOG.md"
+    "bin"
   ],
   "dependencies": {
     "chokidar": "^4.0.3",

@@ -11,18 +11,7 @@
 
 :computer: Разработка сайтов на локальном диске
 
-Загрузка готовых файлов: сборка CSS/JS выполняется внешними инструментами.
-
 :file_folder: Файлы шаблона автоматически сортируются по типам
-
-
-## Требования и совместимость
-
-Нужен **Node.js 22.18 или новее**. В v2 сохранены `require('insales-uploader')`, вызов с `new` и без него, JS-конфиги и основные команды CLI. TypeScript нужен только для разработки самого uploader; пользователи устанавливают готовый JavaScript-пакет с декларациями типов.
-
-**Gulp-интеграция удалена.** Методов `src`, `dest`, потокового `watch`, `triggerFile` и настроек `plugins` больше нет. См. [переход с v1 на v2](MIGRATION.md).
-
-По умолчанию используется HTTPS. Для локального HTTP-сервера явно задайте `account.http: true`. Ошибки API, сети и файловой системы отклоняют Promise; CLI завершает команду с ненулевым кодом. В своих скриптах обрабатывайте ошибки через `.catch(...)` или `try/catch`.
 
 ## Установка
 
@@ -32,7 +21,11 @@ npm install insales-uploader
 
 ## Пример
 
+Файл `uploader.mjs`:
+
 ```javascript
+import uploader from 'insales-uploader';
+
 // Настройки
 const options = {
   account: {
@@ -53,7 +46,6 @@ const options = {
 }
 
 // Инициализация
-const uploader = require('insales-uploader');
 const IU = new uploader(options);
 
 async function main() {
@@ -125,6 +117,16 @@ theme: {
   skipUnchanged: true
 }
 ```
+
+Или включите параметр только для одного запуска через CLI:
+
+```sh
+uploader download --skip-unchanged
+uploader downloadFiles --skip-unchanged
+uploader start --skip-unchanged
+```
+
+Чтобы явно отключить его на один запуск, используйте `uploader download --no-skip-unchanged`. Флаг CLI имеет приоритет над конфигом и не изменяет файл настроек. Если ни один флаг не указан, используется значение из конфига.
 
 При `skipUnchanged: true` uploader скачивает содержимое и сравнивает его с локальным файлом побайтово. Если содержимое совпадает, запись пропускается и локальный `mtime` сохраняется. Новые и изменённые файлы записываются как обычно, в том числе поверх локальных правок. Пробелы и переводы строк тоже считаются изменением содержимого.
 

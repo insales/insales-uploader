@@ -6,7 +6,7 @@ import type { UploaderOptions, NormalizedOptions } from '../types';
 export default function mergeOptions(input: UploaderOptions): NormalizedOptions {
   if (input && 'plugins' in input)
     throw new Error(
-      'InSales Uploader v2: plugins/Gulp больше не поддерживаются. Собирайте файлы внешним инструментом и удалите plugins из конфигурации. См. MIGRATION.md.',
+      'InSales Uploader v2: plugins/Gulp больше не поддерживаются. Собирайте файлы внешним инструментом и удалите plugins из конфигурации.',
     );
   for (const key of ['id', 'token', 'url'] as const) {
     if (!input?.account?.[key]) throw new Error(`Отсутствует ${key} аккаунта!`);

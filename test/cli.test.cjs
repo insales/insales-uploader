@@ -41,9 +41,59 @@ test('CLI accepts the minimum Node.js version and newer releases', async t => {
 
 test('CLI help and version work without config', async t => {
   const root = await directory(t);
-  assert.match((await run(['--help'], root)).stdout, /download/);
+  const help = (await run(['--help'], root)).stdout;
+  assert.match(help, /download/);
+  assert.match(help, /--skip-unchanged/);
+  assert.match(help, /--no-skip-unchanged/);
   assert.equal((await run(['--version'], root)).stdout.trim(), require('../package.json').version);
 });
+
+for (const command of ['download', 'downloadFiles']) {
+  test(`CLI ${command} resolves skipUnchanged flags against config without editing it`, async t => {
+    const cases = [
+      {name: 'default', configured: undefined, flags: [], preserve: false},
+      {name: 'config enables', configured: true, flags: [], preserve: true},
+      {name: 'config disables', configured: false, flags: [], preserve: false},
+      {name: 'CLI enables', configured: false, flags: ['--skip-unchanged'], preserve: true},
+      {name: 'CLI disables', configured: true, flags: ['--no-skip-unchanged'], preserve: false},
+    ];
+    for (const scenario of cases) await t.test(scenario.name, async t => {
+      const root = await directory(t);
+      const remote = await server(t, request => {
+        if (request.url === '/admin/themes/42/assets.json') return {body: [
+          {id: 1, type: 'Asset::Snippet', inner_file_name: 'same.liquid'},
+        ]};
+        if (request.url === '/admin/themes/42/widget_types.json') return {body: []};
+        if (request.url === '/admin/themes/42/assets/1.json') return {body: {content: 'unchanged'}};
+        if (request.url.startsWith('/admin/files.json')) return {body: [
+          {id: 1, absolute_url: `http://${remote.host}/same.txt`},
+        ]};
+        if (request.url === '/same.txt') return {body: 'unchanged'};
+        return {status: 404};
+      });
+      const config = path.join(root, 'insales-config.js');
+      const settings = 'module.exports = ' + JSON.stringify({
+        account: {id: 'key', token: 'fixture', url: remote.host, http: true},
+        theme: {id: 42, root, backup: false, assetsSync: false, skipUnchanged: scenario.configured},
+      });
+      await fs.writeFile(config, settings);
+      const target = path.join(root, command === 'download' ? 'snippets/same.liquid' : 'files/same.txt');
+      await fs.mkdir(path.dirname(target), {recursive: true});
+      await fs.writeFile(target, 'unchanged');
+      const old = new Date('2000-01-01T00:00:00Z');
+      await fs.utimes(target, old, old);
+      const before = (await fs.stat(target)).mtimeMs;
+
+      // Exercise root options both before and after the subcommand.
+      const args = command === 'download' ? [command, ...scenario.flags] : [...scenario.flags, command];
+      await run(args, root);
+      const after = (await fs.stat(target)).mtimeMs;
+      assert.equal(after === before, scenario.preserve);
+      assert.equal(await fs.readFile(target, 'utf8'), 'unchanged');
+      assert.equal(await fs.readFile(config, 'utf8'), settings);
+    });
+  });
+}
 test('CLI init honors --cwd and refuses to overwrite existing settings', async t => {
   const root = await directory(t);
   await run(['--cwd', root, 'init'], path.resolve(__dirname, '..'));
