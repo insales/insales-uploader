@@ -17,6 +17,13 @@ export default tseslint.config(
       '@typescript-eslint/no-misused-promises': 'error',
     }},
   {files: ['lib/help/safeName.ts', 'lib/help/removeEtx.ts'], rules: {'no-control-regex': 'off'}},
+  {files: ['lib/{configuration,http,resources,operations,sync}/**/*.ts'], rules: {
+    'no-console': 'error',
+    'no-restricted-imports': ['error', {patterns: [{group: ['**/cli', '**/cli/**', 'commander'], message: 'Application services must not depend on the CLI.'}]}],
+  }},
+  {files: ['lib/cli/{commands,io}/**/*.ts'], rules: {
+    'no-restricted-imports': ['error', {patterns: [{group: ['../index', '../program', '../run'], message: 'CLI leaf modules must not import the composition root.'}]}],
+  }},
   // A type-only namespace exposes named types alongside the callable CommonJS export.
   {files: ['lib/index.ts'], rules: {'@typescript-eslint/no-namespace': 'off'}},
 );

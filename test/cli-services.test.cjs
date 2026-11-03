@@ -1,0 +1,61 @@
+const {test} = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const {directory, server} = require('./helpers.cjs');
+const {Transport} = require('../dist/http/transport');
+const {Resources} = require('../dist/resources');
+const {SyncService} = require('../dist/sync/service');
+const {recoverSync} = require('../dist/sync/recovery');
+test('transport retries rate-limited reads, never retries writes and refuses redirects', async t => {
+  let count = 0;
+  const remote = await server(t, r => {
+    if (r.url.includes('redirect')) return {status: 302, headers: {Location: '/admin/next.json'}};
+    if (r.method === 'PUT') return {status: 503};
+    return ++count === 1 ? {status: 429, headers: {'Retry-After': '0'}} : {body: []};
+  });
+  const transport = new Transport({account: {id:'key', token:'secret', url:remote.host, http:true}});
+  assert.deepEqual(await transport.request('GET', '/admin/test.json'), []);
+  await assert.rejects(transport.request('PUT', '/admin/test.json', {}));
+  assert.equal(remote.requests.filter(r => r.method === 'PUT').length, 1);
+  await assert.rejects(transport.request('GET', '/admin/redirect.json'));
+  assert.equal(remote.requests.filter(r => r.url.includes('next')).length, 0);
+});
+test('sync filters, dry run, journal recovery and restoration use actual destination state', async t => {
+  const root = await directory(t);
+  let content = 'before';
+  let fail = false;
+  const remote = await server(t, r => {
+    if (r.url.endsWith('/widget_types.json')) return {body: []};
+    if (r.url.endsWith('/assets.json')) return {body: [{id:1, type:'Asset::Snippet', inner_file_name:'a.liquid'}]};
+    if (r.url.endsWith('/raw.json')) return {body:content};
+    if (r.method === 'PUT') {content = r.body.asset.content; return fail ? {status:503} : {body:{id:1}};}
+    return {body:{id:1, type:'Asset::Snippet'}};
+  });
+  const settings = {account:{id:'key',token:'secret',url:remote.host,http:true},theme:{id:'42',root}};
+  const resources = new Resources(new Transport(settings), '42');
+  const service = new SyncService(settings,resources,{});
+  await service.execute(await service.prepare('pull'));
+  await fs.writeFile(path.join(root,'snippets/a.liquid'),'after');
+  const dry = new SyncService(settings,resources,{dryRun:true});
+  const before = JSON.stringify(await service.history());
+  await dry.execute(await dry.prepare('push'));
+  assert.equal(content,'before'); assert.equal(JSON.stringify(await service.history()),before);
+  fail = true;
+  await assert.rejects(service.execute(await service.prepare('push')));
+  assert.equal(content,'after');
+  fail = false;
+  const count = remote.requests.filter(r=>r.method==='PUT').length;
+  await service.execute(await service.prepare('push'));
+  assert.equal(remote.requests.filter(r=>r.method==='PUT').length,count);
+  const filtered = new SyncService(settings,resources,{ignore:['snippets/**']});
+  assert.equal((await filtered.prepare('push')).plan.actions.length,0);
+  const selectedDelete = new SyncService(settings,resources,{only:['snippets/a.liquid'],delete:true});
+  assert.equal((await selectedDelete.prepare('pull')).plan.actions.length,1, 'unselected missing directories must not block restore');
+  const history = await service.history();
+  const failed = history.find(j=>!j.finished);
+  assert.ok(failed);
+  await recoverSync(service,failed.id,true,{delete:true});
+  assert.equal(content,'before');
+  assert.ok(!JSON.stringify(await service.history()).includes('secret'));
+});

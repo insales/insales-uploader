@@ -8,5 +8,5 @@ if (!semver.satisfies(process.versions.node, requiredVersion)) {
     'Обновите Node.js и запустите uploader снова.');
   process.exitCode = 1;
 } else {
-  require('../dist/cli');
+  require('../dist/cli').run().then(code => { process.exitCode = code; });
 }

@@ -1,5 +1,7 @@
 # InSales <> uploader
 
+> Версия 2.0.0 находится в разработке; публикация отложена до выхода новых API InSales. [Актуальные команды CLI и профили](CLI.md). Ниже сохранена историческая справка по предыдущему интерфейсу CLI; программный API сохраняется.
+
 [![npm version](https://img.shields.io/npm/v/insales-uploader)](https://www.npmjs.com/package/insales-uploader)
 
 Менеджер ассетов для платформы [InSales](http://www.insales.ru/).

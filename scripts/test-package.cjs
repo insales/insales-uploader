@@ -70,7 +70,7 @@ async function main() {
     const cli = await npm(['exec', '--offline', '--', 'uploader', '--version'], temporary);
     assert.equal(cli.stdout.trim(), pkg.version);
     await npm(['exec', '--offline', '--', 'uploader', 'init'], temporary);
-    assert.match(await fs.readFile(path.join(temporary, 'insales-config.js'), 'utf8'), /module\.exports/);
+    assert.match(await fs.readFile(path.join(temporary, 'insales-config.json'), 'utf8'), /tokenEnv/);
 
     await fs.writeFile(path.join(temporary, 'tsconfig.json'), JSON.stringify({
       compilerOptions: {
