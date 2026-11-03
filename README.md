@@ -6,20 +6,21 @@
 
 > [:arrow_forward: Установка/Настройка/Запуск](https://www.youtube.com/watch?v=ImFlI1sUp5U)
 
-> [:octocat: Пример организации работы с InSales <> uploader](https://github.com/insales-uploader/uploader-work-space)
 
 ## Почему InSales uploader?
 
 :computer: Разработка сайтов на локальном диске
 
-:heart: Совместимость с тысячами Gulp плагинов
+Загрузка готовых файлов: сборка CSS/JS выполняется внешними инструментами.
 
 :file_folder: Файлы шаблона автоматически сортируются по типам
 
 
 ## Требования и совместимость
 
-Нужен **Node.js 22.18 или новее**. Обновление сборки до Babel 8 и переход на встроенный `fetch` прекращают поддержку Node.js 10–20. Внешний интерфейс `require('insales-uploader')`, вызов с `new` и CLI сохранены.
+Нужен **Node.js 22.18 или новее**. В v2 сохранены `require('insales-uploader')`, вызов с `new` и без него, JS-конфиги и основные команды CLI. TypeScript нужен только для разработки самого uploader; пользователи устанавливают готовый JavaScript-пакет с декларациями типов.
+
+**Gulp-интеграция удалена.** Методов `src`, `dest`, потокового `watch`, `triggerFile` и настроек `plugins` больше нет. См. [переход с v1 на v2](MIGRATION.md).
 
 По умолчанию используется HTTPS. Для локального HTTP-сервера явно задайте `account.http: true`. Ошибки API, сети и файловой системы отклоняют Promise; CLI завершает команду с ненулевым кодом. В своих скриптах обрабатывайте ошибки через `.catch(...)` или `try/catch`.
 
@@ -55,10 +56,15 @@ const options = {
 const uploader = require('insales-uploader');
 const IU = new uploader(options);
 
-IU.download()
-  .then(()=>{
-    return IU.stream()
-  })
+async function main() {
+  await IU.download();
+  await IU.stream();
+}
+
+main().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});
 ```
 
 ### Консольный клиент
@@ -156,16 +162,37 @@ root/
 
 ```sh
 npm ci
-npm test
+npm run check
 npm run test:coverage
-npm pack --dry-run
 ```
 
-`npm ci` собирает `dist` через `prepare`. `npm run compile` пересобирает исходники вручную; ошибки сборки завершают команду с ошибкой. Lock-файл хранится в Git.
+`npm run check` выполняет проверку форматирования, ESLint без предупреждений, строгую проверку TypeScript, сборку, тесты и установку npm-архива в чистый проект. Проверяются CommonJS, ESM, CLI и типы потребителя. Архив остаётся в `.artifacts`; эта команда ничего не публикует. `npm run format` форматирует TypeScript-исходники.
 
-Тесты используют встроенный `node:test`, временные директории и локальные HTTP-серверы. Ключи реального магазина не нужны. Проверяются контракт API, загрузка и скачивание, виджеты, бинарные данные, ошибки, очередь, CLI, резервные копии и настоящий файловый watcher. Покрытие сохраняется в `coverage.lcov`; LCOV используется также для обхода сбоя текстового отчёта покрытия Node.js 22 на Windows.
+`npm ci` собирает `dist` через `prepare`. `npm run compile` очищает и собирает `dist` через TypeScript; ошибки типов запрещают сборку. Lock-файл хранится в Git. `npm run typecheck` также проверяет отрицательные примеры типов: неверное имя задачи или данные другого типа не должны компилироваться.
 
-В GitHub Actions добавлена матрица Windows/Linux и Node.js 22.18/24 с тестами и проверкой упаковки.
+Тесты используют `node:test`, временные директории и локальные HTTP-серверы. Ключи магазина не нужны. Проверяются API, загрузка и скачивание, виджеты, бинарные данные, очередь, CLI, резервные копии и настоящий файловый watcher. Покрытие сохраняется в `coverage.lcov` без обязательного процентного порога.
+
+GitHub Actions проверяет Windows/Linux/macOS и Node.js 22.18/24. Один собранный архив устанавливается и проверяется во всей матрице. В процессе проверки повторная сборка этого архива не выполняется.
+
+## TypeScript и события обновления
+
+```typescript
+import uploader, {type Options} from 'insales-uploader';
+
+const options: Options = {
+  account: {id: 'key', token: 'secret', url: 'example.myinsales.ru'},
+  theme: {
+    id: 42,
+    onUpdate: async update => {
+      console.log(update.event, update.path, update.asset.type);
+    }
+  }
+};
+
+const app = uploader(options); // new uploader(options) тоже поддерживается
+```
+
+`stream(callback)` и `theme.onUpdate` вызываются после успешной загрузки или удаления. Объект события содержит `event`, `path`, `asset`, `insalesInfo`; это обычные данные, без Vinyl и потоковых методов. Async-callbacks ожидаются последовательно. Ошибки запуска отклоняют Promise; ошибки во время наблюдения логируются и передаются через `app.eventEmitter.on('watchError', handler)`. Следующие файловые события продолжают обрабатываться.
 
 ## Синхронизация и виджеты
 

@@ -11,7 +11,7 @@ npm install browser-sync
 ```js
 const bs = require('browser-sync').create('insales_server');
 let optionBS = {
-  proxy: 'http://shop-41254.myinsales.ru/?theme_preview=854716',
+  proxy: 'https://shop-41254.myinsales.ru/?theme_preview=854716',
   reloadDebounce: 5000,
   reloadDelay: 2000,
   https: false
@@ -24,17 +24,20 @@ module.exports = {
     // id: '11111111111111111111111111',
     // token: '222222222222222222222',
     // url: 'shop-41254.myinsales.ru',
-    http: true // Если сайт на https и отказывает работать, нужновы выставить false
+    http: false // HTTPS по умолчанию; true только для явного HTTP
   },
   theme: {
     //id: '854716',
     root: '.',
     backup: true, // Создавать backup после загрузки?
     assetsSync: true, // Делать синхронизацию с директорией assets?
-    onUpdate: ()=>{
+    onUpdate: (update)=>{
+      console.log(update.event, update.path);
       bs.reload();
       // обновление темы
     },
   }
 }
 ```
+
+В v2 этот callback вызывается после успешной операции с API. BrowserSync устанавливается в проекте темы и не является зависимостью uploader. Gulp для этого рецепта не нужен.

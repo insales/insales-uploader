@@ -12,11 +12,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  test:
-    uses: ./.github/workflows/test.yml
-
-  build:
-    needs: test
+  verify-tag:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -40,17 +36,12 @@ jobs:
           assert.equal(lock.packages[''].version, pkg.version, 'Lockfile root version must match package.json');
           NODE
 
-      - run: npm ci
-      - name: Pack tested build
-        run: npm pack --pack-destination "$RUNNER_TEMP"
-      - uses: actions/upload-artifact@v7
-        with:
-          name: npm-package
-          path: ${{ runner.temp }}/insales-uploader-*.tgz
-          if-no-files-found: error
+  test:
+    needs: verify-tag
+    uses: ./.github/workflows/test.yml
 
   publish:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -68,6 +59,7 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
+          sha256sum --check ./insales-uploader-*.tgz.sha256
           dist_tag=latest
           if [[ "${RELEASE_TAG%%+*}" == *-* ]]; then
             dist_tag=next
