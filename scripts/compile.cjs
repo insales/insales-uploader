@@ -1,23 +1,12 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
-
+const {spawnSync} = require('node:child_process');
 async function compile() {
-  const {transformFileAsync} = await import('@babel/core');
   const root = path.resolve(__dirname, '..');
-  const source = path.join(root, 'lib');
-  const output = path.join(root, 'dist');
-  // The output directory is fixed inside this repository.
-  await fs.rm(output, {recursive: true, force: true});
-  for (const entry of await fs.readdir(source, {recursive: true, withFileTypes: true})) {
-    if (!entry.isFile() || !entry.name.endsWith('.js')) continue;
-    const file = path.join(entry.parentPath, entry.name);
-    const destination = path.join(output, path.relative(source, file));
-    const result = await transformFileAsync(file, {configFile: false, babelrc: false,
-      presets: [[require.resolve('@babel/preset-env'), {
-        targets: {node: '22.18'}, modules: 'commonjs', exclude: ['transform-dynamic-import']
-      }]]});
-    await fs.mkdir(path.dirname(destination), {recursive: true});
-    await fs.writeFile(destination, result.code + '\n');
-  }
+  // Fixed build output, never a user-supplied theme path.
+  await fs.rm(path.join(root, 'dist'), {recursive: true, force: true});
+  const result = spawnSync(process.execPath, [require.resolve('typescript/bin/tsc'), '-p', path.join(root, 'tsconfig.json')], {stdio: 'inherit'});
+  if (result.error) throw result.error;
+  process.exitCode = result.status ?? 1;
 }
 compile().catch(error => { console.error(error); process.exitCode = 1; });

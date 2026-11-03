@@ -65,3 +65,34 @@ test('CLI propagates rejected asynchronous API operations as nonzero exit', asyn
   await fs.writeFile(path.join(root, 'insales-config.js'), 'module.exports = ' + JSON.stringify({account: {id: 'key', token: 'secret', url: remote.host, http: true}, theme: {id: 42, root, backup: false}}));
   await assert.rejects(run(['upload'], root), error => error.code === 1 && /403/.test(error.stderr));
 });
+
+test('CLI loads explicit config and preload relative to --cwd', async t => {
+  const root = await directory(t);
+  const settings = {account: {id: 'key', token: 'fixture', url: 'example.com'}, theme: {id: 42, root, backup: false}};
+  await fs.writeFile(path.join(root, 'preload.cjs'), 'globalThis.uploaderPreloaded = true;');
+  await fs.writeFile(path.join(root, 'custom.cjs'), 'if (!globalThis.uploaderPreloaded) throw new Error("preload missing"); module.exports = ' + JSON.stringify(settings));
+  await run(['--cwd', root, '--myappfile', 'custom.cjs', '--require', './preload.cjs', 'b'], path.resolve(__dirname, '..'));
+  assert.equal((await fs.readdir(path.join(root, 'backup'))).filter(file => file.endsWith('.zip')).length, 1);
+});
+
+test('CLI discovers JSON config in a parent directory', async t => {
+  const root = await directory(t);
+  const nested = path.join(root, 'nested');
+  await fs.mkdir(nested);
+  await fs.writeFile(path.join(root, 'insales-config.json'), JSON.stringify({
+    account: {id: 'key', token: 'fixture', url: 'example.com'}, theme: {id: 42, root, backup: false},
+  }));
+  await run(['backup'], nested);
+  assert.equal((await fs.readdir(path.join(root, 'backup'))).length, 1);
+});
+
+test('CLI rejects removed plugin config before making API requests', async t => {
+  const root = await directory(t);
+  const remote = await server(t, () => assert.fail('plugins must fail before network access'));
+  await fs.writeFile(path.join(root, 'insales-config.js'), 'module.exports = ' + JSON.stringify({
+    account: {id: 'key', token: 'fixture', url: remote.host, http: true}, theme: {id: 42, root}, plugins: {},
+  }));
+  await assert.rejects(run(['upload'], root), error => error.code === 1 && /plugins\/Gulp/.test(error.stderr));
+  assert.equal(remote.requests.length, 0);
+  await assert.rejects(run(['--completion', 'bash'], root), error => /unknown option/.test(error.stderr));
+});

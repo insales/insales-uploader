@@ -168,10 +168,10 @@ test('raw downloads preserve JSON whitespace and media uses authenticated source
   });
   const app = instance(root, remote.host);
   const raw = path.join(root, 'config/settings_data.json');
-  await getAsset.call(app, {id: 1, isRaw: true, path: raw});
+  await getAsset(app, {id: 1, isRaw: true, path: raw});
   assert.equal(await fs.readFile(raw, 'utf8'), text);
   const media = path.join(root, 'media/image.png');
-  await getAsset.call(app, {id: 2, isMedia: true, path: media, asset_url: `http://${remote.host}/cdn/image.png?v=1`});
+  await getAsset(app, {id: 2, isMedia: true, path: media, asset_url: `http://${remote.host}/cdn/image.png?v=1`});
   assert.deepEqual(await fs.readFile(media), Buffer.from([0, 255, 7, 128, 239, 191]));
   assert.equal(remote.requests[1].url, '/admin/themes/42/assets/2/raw.json');
 });

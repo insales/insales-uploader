@@ -18,5 +18,12 @@ test('factory instances own their state', () => {
   const second = Uploader(options('.'));
   assert.notEqual(first.assets, second.assets);
   assert.notEqual(first.TaskManager, second.TaskManager);
+  assert.notEqual(first.files, second.files);
+  assert.notEqual(first.watcherService, second.watcherService);
   assert.notEqual(first.options, second.options);
+});
+
+test('v2 exposes ready-file watching without Gulp stream methods', () => {
+  const app = Uploader(options('.'));
+  for (const method of ['src', 'dest', 'watch', 'triggerFile']) assert.equal(app[method], undefined);
 });

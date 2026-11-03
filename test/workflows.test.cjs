@@ -54,7 +54,7 @@ test('new widget upload assembles info and sources into one top-level payload', 
   await write({path: path.join(folder, 'info.json'), content: JSON.stringify(info)});
   await write({path: path.join(folder, 'snippet.liquid'), content: '<p>new</p>'});
   await write({path: path.join(folder, 'messages.json'), content: '{"ru":{}}'});
-  await change.call(app, app.getFileInfo({path: path.join(folder, 'info.json')}, true).asset, false);
+  await change(app, app.getFileInfo({path: path.join(folder, 'info.json')}, true).asset, false);
   const request = remote.requests.find(r => r.method === 'POST');
   assert.equal(request.url, '/admin/themes/42/widget_types.json');
   assert.deepEqual(request.body, {...info, snippet_content: '<p>new</p>', messages: '{"ru":{}}'});
@@ -63,7 +63,7 @@ test('existing widget source uses PUT rather than creating a duplicate', async t
   const remote = await server(t, r => ({body: r.method === 'GET' ? (r.url.includes('widget_types') ? [widget] : []) : {id: 8}}));
   const app = instance(await directory(t), remote.host);
   const file = {path: path.join(app.paths.root, 'widget_types/banner/snippet.js'), contents: Buffer.from('new code')};
-  await change.call(app, app.getFileInfo(file, true).asset, false);
+  await change(app, app.getFileInfo(file, true).asset, false);
   assert.deepEqual(remote.requests.filter(r => r.method !== 'GET').map(r => [r.method, r.url, r.body]), [
     ['PUT', '/admin/themes/42/widget_types/8.json', {snippet_js: 'new code'}]
   ]);
@@ -72,7 +72,7 @@ test('removing widget source clears a field; removing info deletes via widget en
   const remote = await server(t, r => ({body: r.method === 'GET' ? (r.url.includes('widget_types') ? [widget] : []) : ''}));
   const app = instance(await directory(t), remote.host);
   for (const name of ['snippet.js', 'info.json']) {
-    await remove.call(app, app.getFileInfo({path: path.join(app.paths.root, 'widget_types/banner', name)}, false).asset, false);
+    await remove(app, app.getFileInfo({path: path.join(app.paths.root, 'widget_types/banner', name)}, false).asset, false);
   }
   assert.deepEqual(remote.requests.filter(r => r.method !== 'GET').map(r => [r.method, r.url, r.body]), [
     ['PUT', '/admin/themes/42/widget_types/8.json', {snippet_js: ''}],
@@ -110,10 +110,10 @@ test('downloaded widget metadata and null sources round-trip without unsupported
   await write({path: infoPath, content: JSON.stringify(info)});
   await write({path: path.join(path.dirname(infoPath), 'setup.json'), content: ''});
   await write({path: path.join(path.dirname(infoPath), 'snippet.liquid'), content: widget.snippet_content});
-  await change.call(app, app.getFileInfo({path: infoPath}, true).asset, false);
+  await change(app, app.getFileInfo({path: infoPath}, true).asset, false);
   assert.equal(remote.requests.filter(r => r.method !== 'GET').length, 0);
   await write({path: path.join(path.dirname(infoPath), 'snippet.liquid'), content: '<p>Changed</p>'});
-  await change.call(app, app.getFileInfo({path: infoPath}, true).asset, false);
+  await change(app, app.getFileInfo({path: infoPath}, true).asset, false);
   assert.equal(remote.requests.filter(r => r.method === 'PUT').length, 1);
 });
 
@@ -123,7 +123,7 @@ test('real widget metadata validation failures propagate instead of silently ski
   const app = instance(await directory(t), remote.host);
   const file = path.join(app.paths.root, 'widget_types/banner/info.json');
   await write({path: file, content: JSON.stringify({type: widget.type, handle: widget.handle, name: {ru: 'Новое имя'}, widget_category_handle: 'new-category'})});
-  await assert.rejects(change.call(app, app.getFileInfo({path: file}, true).asset, false), error => {
+  await assert.rejects(change(app, app.getFileInfo({path: file}, true).asset, false), error => {
     assert.equal(error.statusCode, 422);
     assert.deepEqual(error.response.data, body);
     return true;

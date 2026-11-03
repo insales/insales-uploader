@@ -56,3 +56,74 @@ test('helper queue preserves input, binds context and propagates rejection', asy
   assert.equal(tasks.length, 2);
   await assert.rejects(queue([() => { throw new Error('stop'); }]), /stop/);
 });
+
+test('batch promise settles for its own work, and pending batches remain serial', async () => {
+  const manager = TaskManager({delay: 0});
+  const firstStarted = Promise.withResolvers();
+  const releaseFirst = Promise.withResolvers();
+  const secondStarted = Promise.withResolvers();
+  const releaseSecond = Promise.withResolvers();
+  const events = [];
+  manager.create('first', async () => {
+    events.push('first started');
+    firstStarted.resolve();
+    await releaseFirst.promise;
+    events.push('first finished');
+  });
+  manager.create('second', async () => {
+    events.push('second started');
+    secondStarted.resolve();
+    await releaseSecond.promise;
+    events.push('second finished');
+  });
+  const first = manager.run('first', [{}]);
+  const second = manager.run('second', [{}]);
+  await firstStarted.promise;
+  assert.deepEqual(events, ['first started']);
+  assert.equal(manager.lock, true);
+  releaseFirst.resolve();
+  await first;
+  await secondStarted.promise;
+  assert.deepEqual(events, ['first started', 'first finished', 'second started']);
+  releaseSecond.resolve();
+  await second;
+  assert.equal(manager.lock, false);
+});
+
+test('registration and input array are captured before waiting in the queue', async () => {
+  const manager = TaskManager({delay: 0});
+  const release = Promise.withResolvers();
+  const started = Promise.withResolvers();
+  manager.create('block', async () => { started.resolve(); await release.promise; });
+  const blocking = manager.run('block', [{}]);
+  await started.promise;
+  const values = [];
+  manager.create('work', item => values.push(item.value), 'path');
+  const items = [{path: 'x', value: 1}, {path: 'x', value: 2}, {value: 3}, {value: 4}];
+  const pending = manager.run('work', items);
+  items.push({value: 5});
+  manager.create('work', () => assert.fail('new handler must not replace queued work'));
+  release.resolve();
+  await blocking;
+  await pending;
+  assert.deepEqual(values, [2, 3, 4]);
+});
+
+test('rejected async handler skips only its own remaining items and retains the error', async () => {
+  const manager = TaskManager({delay: 0});
+  const failure = new Error('asynchronous failure');
+  const values = [];
+  manager.create('work', async item => {
+    values.push(item.value);
+    await Promise.resolve();
+    if (item.value === 1) throw failure;
+  });
+  const failed = manager.run('work', [{value: 1}, {value: 2}]);
+  const next = manager.run('work', [{value: 3}]);
+  await assert.rejects(failed, error => error === failure);
+  await next;
+  await manager.idle();
+  assert.deepEqual(values, [1, 3]);
+  assert.equal(manager.lock, false);
+  await assert.rejects(manager.run('constructor', []), /Unknown task/);
+});
